@@ -71,20 +71,24 @@ def generate_grid():
     return grid
 
 
-# Create Minefield class to graphically represent and keep track of the grid.
+# Define render grid function to blit unopened cell images on to each cell in the grid. This gives us the starting
+# minefield graphic
+
+def render_grid(screen, grid):
+    for row in range(5):
+        for col in range(5):
+            screen.blit(images['Unopened'], pygame.Rect(col * cell_size, row * cell_size, cell_size, cell_size))
+    pygame.display.update()
+
+
+# Create Minefield class to keep track of the contents of each cell in the grid which can be retrieved each time the
+# user clicks.
 class Minefield:
     def __init__(self, grid):
         self.grid = grid
 
     def get_cell(self, row, col):  # Retrieves whatever is in the cell
         return self.grid[row][col]
-
-    def render_grid(self, screen, grid):  # Loops through the minefield and blits corresponding image onto each index.
-        for row in range(5):
-            for col in range(5):
-                symbol = grid[row][col]
-                screen.blit(images[symbol], pygame.Rect(col * cell_size, row * cell_size, cell_size, cell_size))
-        pygame.display.update()
 
 
 # Define main function to act as the driver for the game. It will create an instance of the Minefield class to act as
@@ -96,7 +100,7 @@ def main():
     load_images()
     game = generate_grid()
     minefield = Minefield(game)  # minefield is now a game instance
-    minefield.render_grid(screen, game)  # Grid now loaded
+    render_grid(screen, game)  # Grid now loaded
     pygame.display.update()
     running = True
     pygame.display.update()
@@ -104,13 +108,14 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                location = pygame.mouse.get_pos()
-                col = location[0] // cell_size  # x value of mouse
-                row = location[1] // cell_size  # y value of mouse
-                cell_selected = minefield.get_cell(row, col)  # Programme recognises which cell the user has clicked on and can act according to what is contained in the cell
-                if cell_selected == 'Mine':
-                    running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:  # Getting user mouse input
+                x, y = pygame.mouse.get_pos()
+                row = y // cell_size
+                col = x // cell_size
+                cell = minefield.get_cell(row, col)  # Programme now knows which cell user is clicking on
+                screen.blit(images[cell], pygame.Rect(col * cell_size, row * cell_size, cell_size, cell_size))
+                pygame.display.update()  # Unopened cell image swapped for corresponding image to cell contents
+    pygame.quit()
 
 
 main()
