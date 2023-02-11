@@ -108,11 +108,12 @@ def main():
     screen = pygame.display.set_mode((width, height))
     load_images()
     running = True
+    render_game(screen, generate_grid())
+    pygame.display.update()
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-        render_game(screen, generate_grid())
 
 
 # Define render grid function to alternate colours and produce a grid to display to the user.
