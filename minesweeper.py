@@ -1,89 +1,155 @@
-# Create an empty 5x5 grid and then randomly replace each index with either - or # at a ratio of 4:1
-
-grid_sides = 5
-empty_grid = [[None] * grid_sides for x in range(grid_sides)]
-
+"""
+This is the file which holds all code for the Minesweeper game
+"""
 import random
+import pygame
 
-rows = len(empty_grid)
-for row in range(rows):
-    cols = len(empty_grid[row])
-    for col in range(cols):
-        rng = random.randint(1,5)
-        if rng == 5:
-            empty_grid[row][col] = "#"
-        else:
-            empty_grid[row][col] = "-"
+# Create the dimensions for the minefield interface that will be displayed to the user. Create a dictionary that will
+# store all the necessary images for the game
 
-mine_grid = empty_grid
+width = height = 512
+sq_size = height // 5
+images = {}
 
-# Create a function to check if mine is adjacent and increase counter but excludes out of bounds checks
 
-mines = 0
-rows = len(mine_grid)
-for row in range(rows):
-    cols = len(mine_grid[row])
-    for col in range(cols):
-        
-        # Skip if contains mine
-            
-        if mine_grid[row][col] == "#":
-            continue
+# Define load images function to loop through list of symbols and set the value to each symbol in the dictionary as its
+# corresponding image.
 
-        # North-west 
+def load_images():
+    symbols = ['1', '2', '3', '4', '5', '6', '7', '8', '0', 'Mine', 'Flag']
+    for symbol in symbols:
+        images[symbol] = pygame.transform.scale(
+            pygame.image.load('/Users/james/Desktop/Python Projects/Minesweeper/Images/' +
+                              symbol + '.png'), (sq_size, sq_size))
 
-        if row > 0 and col > 0 and mine_grid[row-1][col-1] == "#":
-            mines += 1
 
-        # North
+# Define a function to generate an empty 5x5 grid and then randomly replace each index with either '-' for an empty
+# square or 'mine' for a mine at a ratio of 4:1. Then, check each empty square to see how many mines are adjacent to
+# it and replace '-' with the corresponding integer.
 
-        if row > 0 and mine_grid[row-1][col] == "#":
-            mines += 1
+def generate_grid():
+    grid_sides = 5
+    grid = [[None] * grid_sides for x in range(grid_sides)]
 
-        # North-east
+    rows = len(grid)
+    for row in range(rows):
+        cols = len(grid[row])
+        for col in range(cols):
+            rng = random.randint(1, 5)
+            if rng == 5:
+                grid[row][col] = "Mine"
+            else:
+                grid[row][col] = "-"
 
-        if row > 0 and col < 4 and mine_grid[row-1][col+1] == "#":
-            mines += 1
+    mines = 0
+    rows = len(grid)
+    for row in range(rows):
+        cols = len(grid[row])
+        for col in range(cols):
 
-        # West
+            # Skip if contains mine
 
-        if col > 0 and mine_grid[row][col-1] == "#":
-            mines += 1
+            if grid[row][col] == "Mine":
+                continue
 
-        # East 
+            # North-west
 
-        if col < 4 and mine_grid[row][col+1] == "#":
-            mines += 1
+            if row > 0 and col > 0 and grid[row - 1][col - 1] == "Mine":
+                mines += 1
 
-        # South-west 
+            # North
 
-        if row < 4 and col > 0 and mine_grid[row+1][col-1] == "#":
-            mines += 1
+            if row > 0 and grid[row - 1][col] == "Mine":
+                mines += 1
 
-        # South
+            # North-east
 
-        if row < 4 and mine_grid[row+1][col] == "#":
-            mines += 1
+            if row > 0 and col < 4 and grid[row - 1][col + 1] == "Mine":
+                mines += 1
 
-        # South-east 
+            # West
 
-        if row < 4 and col < 4 and mine_grid[row+1][col+1] == "#":
-            mines += 1
+            if col > 0 and grid[row][col - 1] == "Mine":
+                mines += 1
 
-        # Convert - to number stored in mines and reset counter
+            # East
 
-        mine_grid[row][col] = mines
-        mines = 0  
+            if col < 4 and grid[row][col + 1] == "Mine":
+                mines += 1
 
-# Surround each index in lines and append to new list. Insert new line after every 6th index, then print string
+            # South-west
 
-minesweeper = []
-for row in mine_grid:
-    for col in row:
-        minesweeper.append("|" + str(col) + "|")
+            if row < 4 and col > 0 and grid[row + 1][col - 1] == "Mine":
+                mines += 1
 
-new_line = 6
-for i in range(-1, len(minesweeper), new_line):
-    minesweeper.insert(i+new_line, "\n")
-final_minesweeper = "".join(minesweeper)
-print(final_minesweeper)
+            # South
+
+            if row < 4 and grid[row + 1][col] == "Mine":
+                mines += 1
+
+            # South-east
+
+            if row < 4 and col < 4 and grid[row + 1][col + 1] == "Mine":
+                mines += 1
+
+            # Convert - to number stored in mines and reset counter
+
+            grid[row][col] = str(mines)
+            mines = 0
+
+    return grid
+
+
+# Define main function to act as the driver for the game. It will set up the screen and present the grid generated by
+# the generate grid function.
+
+def main():
+    pygame.init()
+    screen = pygame.display.set_mode((width, height))
+    load_images()
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+        render_game(screen, generate_grid())
+
+
+# Define render grid function to alternate colours and produce a grid to display to the user.
+
+def render_grid(screen):
+    for row in range(5):
+        for col in range(5):
+            if row % 2 == 0 and col % 2 == 0:
+                color = pygame.Color('white')
+                pygame.draw.rect(screen, color, pygame.Rect(row * sq_size, col * sq_size, sq_size, sq_size))
+            elif row % 2 != 0 and col % 2 == 0:
+                color = pygame.Color('grey')
+                pygame.draw.rect(screen, color, pygame.Rect(row * sq_size, col * sq_size, sq_size, sq_size))
+            elif row % 2 == 0 and col % 2 != 0:
+                color = pygame.Color('grey')
+                pygame.draw.rect(screen, color, pygame.Rect(row * sq_size, col * sq_size, sq_size, sq_size))
+            else:
+                color = pygame.Color('white')
+                pygame.draw.rect(screen, color, pygame.Rect(row * sq_size, col * sq_size, sq_size, sq_size))
+
+
+# Define render symbols function to blit symbol images onto the grid according to what occupies each grid square
+# underneath.
+
+def render_symbols(screen, grid):
+    for row in range(5):
+        for col in range(5):
+            symbol = grid[row][col]
+            screen.blit(images[symbol], pygame.Rect(col * sq_size, row * sq_size, sq_size, sq_size))
+
+
+# Define render game functionto graphically represent the starting grid.
+
+def render_game(screen, grid):
+    render_grid(screen)
+    render_symbols(screen, grid)
+    pygame.display.update()
+
+
+main()
