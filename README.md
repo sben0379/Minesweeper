@@ -2,14 +2,15 @@
 ## Summary
 This is an ongoing project to recreate the classic game Minesweeper using Python. The programme uses a 2D list to simulate a minefield grid and randomly populate it with mines and empty squares. The programme is able to detect how many mines are adjacent to each empty square and display and integer accordingly. 
 ## Latest Update
+### Version 0.5
+* Clicking on a cell containing a 0 will now open all adjacent cells that are not mines
+## Planned Updates
+* Define win and lose mechanics
+* Create starting menu
+## Update history
 ### Version 0.4
 * Starting grid now covered up by tiles
 * Clicking on a cell reveals the contents of the cell
-## Planned Updates
-* Add correct functionality when user clicks on an empty cell
-* Define rules of the game
-* Create starting menu
-## Update history
 ### Version 0.3
 * Programme now recognises mouse input
 * Game window closes if user clicks on a mine
