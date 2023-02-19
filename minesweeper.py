@@ -5,17 +5,25 @@
 import random
 import pygame
 
+pygame.init()
+
 """
 ===================================================== Graphics =========================================================
 """
 
-# Create the dimensions for the minefield interface that will be displayed to the user. Create a dictionary that will
-# store all the necessary images for the game.
+# Create the dimensions for the main menu and minefield interface that will be displayed to the user. Create a
+# dictionary that will store all the necessary images for the game. Define colours and font for the menu.
 
 width = height = 512
 cell_size = height // 5
 images = {}
 screen = pygame.display.set_mode((width, height))
+menu_width = 600
+menu_height = 400
+menu_screen = pygame.display.set_mode((menu_width, menu_height))
+bg_color = (255, 255, 255)  # white
+text_color = (0, 0, 0)  # black
+font = pygame.font.Font(None, 36)
 
 
 # Define load images function to loop through list of symbols and set the value to each symbol in the dictionary as its
@@ -126,6 +134,39 @@ class Minefield:
 """
 
 
+# Define the show menu function to display a main menu to the user and either start the game or quit depending on input.
+def show_menu():
+    while True:
+        menu_screen.fill(bg_color)
+        text = font.render("Welcome to Minesweeper!", True, text_color)
+        text_rect = text.get_rect(center=(menu_width // 2, 50))
+        menu_screen.blit(text, text_rect)
+
+        start_button = pygame.draw.rect(menu_screen, (128, 128, 128), (menu_width // 2 - 100, 150, 200, 50))
+        start_text = font.render("Start game", True, text_color)
+        start_text_rect = start_text.get_rect(center=start_button.center)
+        menu_screen.blit(start_text, start_text_rect)
+
+        quit_button = pygame.draw.rect(menu_screen, (128, 128, 128), (menu_width // 2 - 100, 250, 200, 50))
+        quit_text = font.render("Quit", True, text_color)
+        quit_text_rect = quit_text.get_rect(center=quit_button.center)
+        menu_screen.blit(quit_text, quit_text_rect)
+
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if start_button.collidepoint(mouse_pos):
+                    return
+                elif quit_button.collidepoint(mouse_pos):
+                    pygame.quit()
+                    quit()
+
+
 # Define render starting grid function to blit unopened cell images on to each cell in the grid. This gives us the
 # starting minefield graphic
 
@@ -142,7 +183,7 @@ def render_starting_grid(game):
 # the current game and handle inputs.
 
 def main():
-    pygame.init()
+    show_menu()
     screen = pygame.display.set_mode((width, height))
     load_images()
     game = Minefield()  # Game now initialised
